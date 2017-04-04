@@ -6,6 +6,8 @@ The data set is ModelNet40 (http://3dshapenets.cs.princeton.edu/). We translate 
 
 The first goal is to reconstruct 3D objects according to an input label and a random 200-vector.
 
+The codes in lib are heavily borrowed from [DCGAN](https://github.com/Newmu/dcgan_code).
+
 The training process is:
 
 Step1: Pre-train an Encoder-Decoder model based on the training set.
