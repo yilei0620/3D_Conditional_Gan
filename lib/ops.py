@@ -1,3 +1,4 @@
+
 import theano
 import theano.tensor as T
 from theano.sandbox.cuda.basic_ops import (as_cuda_ndarray_variable,
@@ -51,7 +52,7 @@ def conv_cond_concat(x, y):
     """
     return T.concatenate([x, y*T.ones((x.shape[0], y.shape[1], x.shape[2], x.shape[3], x.shape[4]))], axis=1)
 
-def batchnorm(X ,g = None, b = None, u=None, s=None, a=1., e=1e-8):
+def batchnorm(X ,g = None, b = None, u=None, s=None, a=1., e=1e-7):
     """
     batchnorm with support for not using scale and shift parameters
     as well as inference values (u and s) and partial batchnorm (via a)
@@ -85,7 +86,7 @@ def batchnorm(X ,g = None, b = None, u=None, s=None, a=1., e=1e-8):
     return X
 
 
-def conv(X, w, input_shape = None, filter_shape = None, subsample=(2, 2, 2), border_mode=(1,1,1), conv_mode='conv'):
+def conv(X, w, input_shape = None, filter_shape = None, subsample=(2, 2, 2), border_mode=(1,1,1), conv_mode='conv',output_shape = None):
     """ 
     sets up dummy convolutional forward pass and uses its grad as deconv
     currently only tested/working with same padding
@@ -103,9 +104,12 @@ def conv(X, w, input_shape = None, filter_shape = None, subsample=(2, 2, 2), bor
                 filter_flip = True
             )
     elif conv_mode == 'deconv':
-        input_shape = (None,None,(input_shape[2]-1)*subsample[0] + filter_shape[2] - 2
-                ,(input_shape[3]-1)*subsample[1] + filter_shape[3] - 2
-                ,(input_shape[4]-1)*subsample[2] + filter_shape[4] - 2)
+        if output_shape == None:
+            input_shape = (None,None,(input_shape[2]-1)*subsample[0] + filter_shape[2] - 2*border_mode[0]
+                    ,(input_shape[3]-1)*subsample[1] + filter_shape[3] - 2*border_mode[0]
+                    ,(input_shape[4]-1)*subsample[2] + filter_shape[4] - 2*border_mode[0])
+        else:
+            input_shape = output_shape
 
         return conv3d_grad_wrt_inputs(
                 output_grad = X,
